@@ -1,7 +1,7 @@
 <template>
     <div class="modalContainer">
         <div @click="changeModalStatus" class="modalbg"></div>
-        <div class="modal">
+        <div v-if="!modalRegister" class="modal">
             <h3>INICIAR SESION</h3>
             <form action>
                 <input v-model="email" autocomplete="off" type="email" id="email" placeholder="Ingrese su email" />
@@ -9,17 +9,30 @@
                 <input v-model="password" autocomplete="off" type="text" id="password" placeholder="Ingrese su contraseña" />
 
                 <div class="modalBtn">
-                    <button @click="addData2(email,password)" type="submit">Ingresar</button>
-                <button class="btnGoogle" >Ingresar con Google</button>
+                    <button @click="signInWithEmailAndPassword({email,password})" type="submit">Ingresar</button>
+                <button @click="googleSignIn" class="btnGoogle" >Ingresar con Google</button>
                 </div>
             </form>
-            <a>No estas registrado aun?</a>
+            <a @click="changeModalRegister">No estas registrado aun?</a>
+        </div>
+        <div v-else class="modal" >
+            <h3>REGISTRARSE</h3>
+            <form action>
+                <input v-model="email" autocomplete="off" type="email" id="email" placeholder="Ingrese su email" />
+
+                <input v-model="password" autocomplete="off" type="text" id="password" placeholder="Ingrese su contraseña" />
+
+                <div class="modalBtn">
+                    <button @click="createUserWithEmailAndPassword({email,password})" type="submit">Confirmar</button>
+                </div>
+            </form>
+            <a @click="changeModalRegister">Ya estas registrado? ingresa aca</a>
         </div>
     </div>
 </template>
 
 <script>
-import { mapMutations } from "vuex";
+import { mapMutations} from "vuex";
 import { mapState } from "vuex";
 import { mapActions } from "vuex";
 
@@ -28,19 +41,19 @@ export default {
     name: "ModalSignIn",
     data() {
         return {
-            email: "hola@",
-            password: "se puede"
+            email: "",
+            password: ""
         
         };
     },
     methods: {
-        ...mapMutations("modal", ["changeModalStatus"]),
-        ...mapMutations("firebase", ["addData2"]),
-        ...mapActions("firebase", ["addData"]),   
+        ...mapMutations("modal", ["changeModalStatus", "changeModalRegister" ]),
+        // ...mapMutations("firebase", ["googleSignIn"]),
+        ...mapActions("firebase", ["addData", "createUserWithEmailAndPassword","signInWithEmailAndPassword","signGoogle","googleSignIn"]),   
         
     },
     computed: {
-        ...mapState("modal", ["modalStatus"]),
+        ...mapState("modal", ["modalStatus", "modalRegister"]),
     },
     
 };
@@ -85,6 +98,7 @@ export default {
     opacity: 0;
     animation: swooshIn 0.5s forwards;
 }
+
 
 @keyframes swooshIn {
     from {

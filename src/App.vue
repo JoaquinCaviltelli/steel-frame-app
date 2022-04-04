@@ -6,6 +6,7 @@
             </div> -->
     
     <ModalSignIn v-if="modalStatus"/>
+    <NotificationsPush/>
     <HeaderApp/>
     <router-view/>
   </div>
@@ -18,12 +19,14 @@ import { mapState } from 'vuex'
 
 import HeaderApp from "./components/HeaderApp.vue";
 import ModalSignIn from "./components/ModalSignIn.vue";
+import NotificationsPush from './components/NotificationsPush.vue';
 
 export default {
   name: 'Home',
   components: {
     HeaderApp,
-    ModalSignIn
+    ModalSignIn,
+    NotificationsPush
 },
 computed:{
   ...mapState('modal', ['modalStatus'])
