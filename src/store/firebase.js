@@ -7,7 +7,11 @@ import {
   onAuthStateChanged,
   GoogleAuthProvider,
   signInWithPopup,
+  updateProfile,
 } from "firebase/auth";
+
+//importar router
+import router from "../router";
 
 const db = getFirestore(app);
 const auth = getAuth();
@@ -33,8 +37,6 @@ export default {
             displayName,
             photoURL,
           };
-          console.log(state.currentUser);
-          console.log(user);
           // ...
         } else {
           // User is signed out
@@ -44,84 +46,115 @@ export default {
       });
     },
 
-    //iniciar sesion con google
-    googleSignIn(state) {
-      signInWithPopup(auth, provider)
-        .then((result) => {
-          // This gives you a Google Access Token. You can use it to access the Google API.
-          const credential = GoogleAuthProvider.credentialFromResult(result);
-          const token = credential.accessToken;
-          // The signed-in user info.
-          const user = result.user;
-          console.log(user);
-          // ...
-        })
-        .catch((error) => {
-          // Handle Errors here.
-          const errorCode = error.code;
-          const errorMessage = error.message;
-          // The email of the user's account used.
-          const email = error.email;
-          // The AuthCredential type that was used.
-          const credential = GoogleAuthProvider.credentialFromError(error);
-          // ...
+    //enviar al home si CurrentUser es null
+    sendToHome(state) {
+      if (state.currentUser === null) {
+        if(router.currentRoute.name !== 'Home'){
+          router.push({ name: "Home" });
+        }
+      }
+    }
 
-          console.log(error);
-        });
-    },
+  
+    
   },
   actions: {
-    async addData({ commit }, { email, password }) {
-      try {
-        const docRef = await addDoc(collection(db, "usuarios"), {
-          Email: email,
-          Contraseña: password,
-        });
-        console.log("Document written with ID: ", docRef.id);
-        changeModalStatus();
-      } catch (e) {
-        console.error("Error adding document: ", e);
-      }
-    },
+    // async addData({ commit }, { email, password }) {
+    //   try {
+    //     const docRef = await addDoc(collection(db, "usuarios"), {
+    //       Email: email,
+    //       Contraseña: password,
+    //     });
+    //     console.log("Document written with ID: ", docRef.id);
+    //     changeModalStatus();
+    //   } catch (e) {
+    //     console.error("Error adding document: ", e);
+    //   }
+    // },
 
-    //createUserWithEmailAndPassword
-    async createUserWithEmailAndPassword({ commit }, { email, password }) {
+    //crear nuevo usuario con email y contraseña
+    async createUserWithEmailAndPassword(
+      { commit },
+      { email, password, name }
+    ) {
       try {
         const user = await createUserWithEmailAndPassword(
           auth,
           email,
           password
         );
-        console.log(user);
+        //agregar displayName a user
+        updateProfile(auth.currentUser, {
+          displayName: name,
+        });
+
+        user.user.displayName = name;
         commit("setCurrentUser", user);
         commit("modal/changeModalStatus", null, {
           root: true,
         });
       } catch (e) {
-        console.error("Error adding document: ", e);
+        console.log(e.message);
+        if (e.message === "Firebase: Error (auth/invalid-email).") {
+          toastr["error"]("El correo debe ser valido", "Error");
+        }
+        if (e.message === "Firebase: Error (auth/internal-error).") {
+          toastr["error"]("Email o contraseña incorrecta", "Error");
+        }
+        if (e.message === "Firebase: Error (auth/email-already-in-use).") {
+          toastr["error"]("El correo ya esta en uso", "Error");
+        }
+        if (
+          e.message ===
+          "Firebase: Password should be at least 6 characters (auth/weak-password)."
+        ) {
+          toastr["error"](
+            "La contraseña debe tener al menos 6 digitos",
+            "Error"
+          );
+        }
       }
     },
 
-    // async signIn
+    // ingresar con email y password
     async signInWithEmailAndPassword({ commit }, { email, password }) {
       try {
         const user = await signInWithEmailAndPassword(auth, email, password);
-        console.log(user);
         commit("modal/changeModalStatus", null, {
           root: true,
         });
+        toastr["success"](`${user.user.displayName}`, "Bienvenido");
       } catch (e) {
-        alert(e.message);
+        if (e.message === "Firebase: Error (auth/invalid-email).") {
+          toastr["error"]("El correo debe ser valido", "Error");
+        }
+        if (e.message === "Firebase: Error (auth/user-not-found).") {
+          toastr["error"]("El correo no existe", "Error");
+        }
+        if (e.message === "Firebase: Error (auth/wrong-password).") {
+          toastr["error"]("La contraseña es incorrecta", "Error");
+        }
+        if (e.message === "Firebase: Error (auth/too-many-requests).") {
+          toastr["error"]("Demasiados intentos, intente mas tarde", "Error");
+        }
+        if (e.message === "Firebase: Error (auth/user-disabled).") {
+          toastr["error"]("El usuario esta deshabilitado", "Error");
+        }
+        if (e.message === "Firebase: Error (auth/internal-error).") {
+          toastr["error"]("Email o contraseña incorrecta", "Error");
+        }
       }
     },
 
-    //cerrar sesion
+    //Cerrar sesion
     async signOut({ commit }) {
       try {
         await auth.signOut();
         commit("setCurrentUser", null);
+        toastr["success"]("Sesion cerrada", "Exito");
+        commit("sendToHome");
       } catch (e) {
-        alert(e.message);
+        toastr["error"]("Error al cerrar sesion", "Error");
       }
     },
 
@@ -135,8 +168,9 @@ export default {
         commit("modal/changeModalStatus", null, {
           root: true,
         });
+        toastr["success"](`${user.user.displayName}`, "Bienvenido");
       } catch (e) {
-        console.log(e.message);
+        toastr["error"]("Error al iniciar sesion", "Error");
       }
     },
   },

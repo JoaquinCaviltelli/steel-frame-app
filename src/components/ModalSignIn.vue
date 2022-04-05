@@ -1,7 +1,7 @@
 <template>
     <div class="modalContainer">
         <div @click="changeModalStatus" class="modalbg"></div>
-        <div v-if="!modalRegister" class="modal">
+        <div v-if="!modalRegister" :class="{'modal' : !modalRegister}">
             <h3>INICIAR SESION</h3>
             <form action>
                 <input v-model="email" autocomplete="off" type="email" id="email" placeholder="Ingrese su email" />
@@ -15,15 +15,16 @@
             </form>
             <a @click="changeModalRegister">No estas registrado aun?</a>
         </div>
-        <div v-else class="modal" >
+        <div v-else :class="{'modal' : modalRegister}" >
             <h3>REGISTRARSE</h3>
             <form action>
+                <input v-model="name" autocomplete="off" type="text" id="name" placeholder="Ingrese su Nombre" />
                 <input v-model="email" autocomplete="off" type="email" id="email" placeholder="Ingrese su email" />
 
                 <input v-model="password" autocomplete="off" type="text" id="password" placeholder="Ingrese su contraseña" />
 
                 <div class="modalBtn">
-                    <button @click="createUserWithEmailAndPassword({email,password})" type="submit">Confirmar</button>
+                    <button @click="createUserWithEmailAndPassword({email,password,name})" type="submit">Confirmar</button>
                 </div>
             </form>
             <a @click="changeModalRegister">Ya estas registrado? ingresa aca</a>
@@ -42,7 +43,8 @@ export default {
     data() {
         return {
             email: "",
-            password: ""
+            password: "",
+            name: "",
         
         };
     },
@@ -96,6 +98,7 @@ export default {
     transition: all 1s;
     transform: translateY(-100%);
     opacity: 0;
+    transition: all 1s;
     animation: swooshIn 0.5s forwards;
 }
 
@@ -112,7 +115,7 @@ export default {
 }
 
 h3 {
-    border-bottom: solid 2px #2c3e50;
+    border-bottom: solid 2px var(--color-primary);
     padding: 20px 0;
     margin-bottom: 10px;
 }
@@ -131,13 +134,13 @@ button {
     
 }
 button {
-    background-color: #2c3e50;
+    background-color: var(--color-primary);
     color: white;
     cursor: pointer;
     margin:5px 0;
 }
 .btnGoogle{
-    background-color: var(--color-secundario)
+    background-color: var(--color-secondary);
 }
 a {
     cursor: pointer;

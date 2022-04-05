@@ -6,7 +6,7 @@
             </div> -->
     
     <ModalSignIn v-if="modalStatus"/>
-    <NotificationsPush/>
+ 
     <HeaderApp/>
     <router-view/>
   </div>
@@ -14,23 +14,28 @@
 
 
 <script>
-import { mapState } from 'vuex'
+import { mapState, mapMutations } from 'vuex'
 
 
 import HeaderApp from "./components/HeaderApp.vue";
 import ModalSignIn from "./components/ModalSignIn.vue";
-import NotificationsPush from './components/NotificationsPush.vue';
 
 export default {
   name: 'Home',
   components: {
     HeaderApp,
     ModalSignIn,
-    NotificationsPush
+},
+methods: {
+  ...mapMutations('firebase', ['sendToHome']),
 },
 computed:{
   ...mapState('modal', ['modalStatus'])
 },
+created() {
+  this.sendToHome();
+},
+
 }
 </script>
 
@@ -39,6 +44,8 @@ computed:{
   padding: 0;
   margin: 0;
   box-sizing: border-box;
+  /* font montserrat */
+  font-family: 'Montserrat', sans-serif;
 }   
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
@@ -49,8 +56,8 @@ computed:{
 }
 
 :root{
-  --color-principal: #2c3e50;
-  --color-secundario: #42b983;
+  --color-primary: #2c3e50;
+  --color-secondary: #42b983;
 }
 
 #nav {

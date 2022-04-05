@@ -1,7 +1,8 @@
 <template>
   <header>
     <nav>
-      <div class="logo">logo</div>
+      <router-link to="/"><div class="logo">logo</div></router-link>
+      
       <div class="profile">
         <div v-if="currentUser" class="user">
           <img v-if="currentUser.photoURL" :src="currentUser.photoURL" />
@@ -52,7 +53,7 @@ export default {
 header {
   padding: 0 80px;
   height: 100px;
-  background-color: var(--color-principal);
+  background-color: var(--color-primary);
   width: 100%;
   color: white;
 }
@@ -65,7 +66,10 @@ nav {
   max-width: 1200px;
   margin: 0 auto;
 }
-
+a{
+  text-decoration: none;
+  color: white;
+}
 .profile {
   display: flex;
   align-items: center;
